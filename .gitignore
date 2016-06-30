@@ -1,0 +1,8 @@
+*.pyc
+.DS_Store
+*~
+*.swo
+*.swp
+*.log
+*.ropeproject
+output_*
