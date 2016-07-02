@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pisces.main import main
+from pisces import Pisces
 
 
 if __name__ == '__main__':
@@ -9,7 +9,10 @@ if __name__ == '__main__':
     # url = 'http://image.baidu.com/search/index?tn=baiduimage&ipn=r&ct=201326592&cl=2&lm=-1&st=-1&fm=result&fr=&sf=1&fmq=&pv=&ic=0&nc=1&z=&se=&showtab=0&fb=0&width=&height=&face=0&istype=2&ie=utf-8&word=%E7%81%AB%E7%81%BE'
 
     output_dir = '/tmp/output_fire/'
+    client = Pisces(quiet=False, close=True, browser='firefox')
+    # similar to: client = Pisces()
+    client.download_by_url(url, output_dir, image_count=20)
 
-    main(url, output_dir, image_count=200, quiet=False, close=True, browser='firefox')
-    # similar to the below:
-    # main(url, output_dir)
+    output_dir = '/tmp/output_water/'
+    # use google to download image with keyword: water
+    client.download_by_word('water', 'google', output_dir, image_count=20)

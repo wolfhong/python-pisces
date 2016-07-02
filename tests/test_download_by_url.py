@@ -5,10 +5,10 @@ add_path = os.path.abspath(os.path.dirname(__file__))  # tests
 add_path = os.path.abspath(os.path.dirname(add_path))  # bin
 sys.path.insert(0, add_path)
 
-from pisces.main import main
+from pisces import Pisces
 
 
-def test_engines():
+def test_download_by_url():
     # 使用关键词 "火灾" 进行测试
     baidu_url = 'http://image.baidu.com/search/index?tn=baiduimage&ipn=r&ct=201326592&cl=2&lm=-1&st=-1&fm=result&fr=&sf=1&fmq=&pv=&ic=0&nc=1&z=&se=&showtab=0&fb=0&width=&height=&face=0&istype=2&ie=utf-8&word=%E7%81%AB%E7%81%BE'
     so_url = 'http://image.so.com/i?q=%E7%81%AB%E7%81%BE&src=srp'
@@ -25,13 +25,14 @@ def test_engines():
         ('bing', bing_url),
         ('google', google_url),
     ]
+    client = Pisces(close=True, quiet=True, browser='firefox')
     for engine, url in tuple_list:
         image_count = 1
         output_dir = os.path.join(add_path, 'output_test', engine)
-        ret = main(url, output_dir, image_count=image_count, close=True, quiet=True, browser='firefox')
+        ret = client.download_by_url(url, output_dir, image_count=image_count)
         if ret == image_count:
             print '%s ok...' % engine
         else:
             print '%s error!!!' % engine
 
-test_engines()
+test_download_by_url()

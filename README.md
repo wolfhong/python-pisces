@@ -11,7 +11,7 @@ Pisces uses selenuim, which can work with the mainstream browsers to download th
 
 pisces使用了selenuim,可调用主流的浏览器下载搜索到的图片.pisces还整合了其他的搜索引擎的搜索结果:google/yahoo/bing/百度/sogou/360,丰富可采集的数据集.
 
-## Installtion
+## Installation
 - clone the code and enter the folder
 - python install setup.py
 - or you can directly place the pisces into your project.
@@ -20,19 +20,23 @@ pisces使用了selenuim,可调用主流的浏览器下载搜索到的图片.pisc
 ## Example
 
     # -*- coding: utf-8 -*-
-    from pisces.main import main
+    from pisces import Pisces
 
     if __name__ == '__main__':
         # image search keyword: kitchen fire
         url = 'https://www.google.com/search?safe=strict&hl=zh-CN&site=imghp&tbm=isch&source=hp&biw=1372&bih=661&q=%E7%81%AB%E7%81%BE&oq=%E7%81%AB%E7%81%BE&gs_l=img.3...1527.6030.0.6271.25.13.7.0.0.0.333.333.3-1.1.0....0...1ac.1j4.64.img..18.7.33...0.m7j-m12CPV0'
-        # if you are in china, use the url below instand, unless you're using VPN
+        # if you are in china, use the url below instand.
         # url = 'http://image.baidu.com/search/index?tn=baiduimage&ipn=r&ct=201326592&cl=2&lm=-1&st=-1&fm=result&fr=&sf=1&fmq=&pv=&ic=0&nc=1&z=&se=&showtab=0&fb=0&width=&height=&face=0&istype=2&ie=utf-8&word=%E7%81%AB%E7%81%BE'
 
         output_dir = '/tmp/output_fire/'
+        client = Pisces(quiet=False, close=True, browser='firefox')
+        # similar to: client = Pisces()
+        client.download_by_url(url, output_dir, image_count=100)
 
-        main(url, output_dir, image_count=200, quiet=False, close=True, browser='firefox')
-        # similar to the below:
-        # main(url, output_dir)
+        output_dir = '/tmp/output_water/'
+        # use google to download image with keyword: water
+        client.download_by_word('water', 'google', output_dir, image_count=100)
+
 
 ## Tip
 - The code uses selenuim. Selenium Python bindings provides a simple API to write functional/acceptance tests using Selenium WebDriver. More info to see http://selenium-python.readthedocs.io/installation.html
