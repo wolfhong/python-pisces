@@ -53,7 +53,7 @@ def unicode2str(string, encoding='utf-8'):
 
 class Pisces(object):
 
-    def __init__(self, quiet=False, close=True, browser=None):
+    def __init__(self, quiet=False, close=True, browser=None, retry_count=1):
         '''
         @param quiet 是否打印过程输出
         @param close 是否在运行结束后关闭浏览器
@@ -61,6 +61,7 @@ class Pisces(object):
         '''
         self.quiet = quiet
         self.close = close
+        self.retry_count = retry_count
         browser = (browser or 'firefox').lower()
         assert browser in ['firefox', 'chrome', 'ie', 'opera', 'safari']
         self.browser = browser
@@ -92,6 +93,7 @@ class Pisces(object):
         driver.maximize_window()
         # 浏览器打开爬取页面
         driver.get(url)
+        real_zero_count = 0
         while m <= image_count:
             pos += 500  # 每次下滚500px
             js = "document.documentElement.scrollTop=%d" % pos
@@ -105,6 +107,7 @@ class Pisces(object):
                 if img_url and img_url not in img_url_dic:
                     img_url_dic[img_url] = ''
                     new_image_add += 1
+                    real_zero_count = 0
                     filename = get_local_path(output_dir, m)
                     try:
                         download_image(img_url, filename)  # 保存图片
@@ -112,12 +115,15 @@ class Pisces(object):
                         logging.error(traceback.format_exc())
                     else:
                         if not self.quiet:
-                            print('save %s to %s' % (img_url, filename))
+                            print('save', img_url, 'to', filename)
                         m += 1
                         if m > image_count:
                             break
             if new_image_add == 0:
-                raise AssertionError('no more images loaded...')
+                print('no more images loaded...')
+                real_zero_count += 1
+                if real_zero_count > self.retry_count:
+                    break
         # 关闭浏览器该标签页
         if self.close:
             driver.close()
