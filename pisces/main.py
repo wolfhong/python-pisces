@@ -1,151 +1,209 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import logging
-import traceback
-import uuid
+# see https://www.seleniumhq.org/ for more info.
+from __future__ import unicode_literals, print_function
 import os
-import urllib
-import requests
+import sys
+import uuid
+import time
+import traceback
+from multiprocessing import Pool
+# import requests
 from selenium import webdriver
 
-THIS_PATH = os.path.abspath(os.path.dirname(__file__))  # 本文件路径
-ROOT_PATH = os.path.abspath(os.path.dirname(THIS_PATH))  # 项目根路径
-CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools/chromedriver')
+DEBUG = True
+DOWNLOAD_TIMEOUT = 5  # seconds
+AJAX_TIME = 2  # seconds for implicitly_wait
+PY3 = True if sys.version_info[0] == 3 else False
+
+if PY3:
+    from urllib.request import urlretrieve
+else:
+    from urllib import urlretrieve
 
 
-def get_local_path(output_dir, m):
-    filename = '%s_%s.jpg' % (m, uuid.uuid4().__str__().replace('-', ''))
+# see http://chromedriver.storage.googleapis.com/index.html for chromedriver.
+ROOT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+if sys.platform == 'darwin':
+    CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools/chromedriver_mac')
+elif sys.platform == 'linux':
+    CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools/chromedriver_linux')
+elif sys.platform in ['win32', 'cygwin']:
+    CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools/chromedriver.exe')
+
+
+class GlobalOptions(object):
+    def __init__(self, options=None):
+        self._options = options
+
+    def __getattr__(self, name):
+        if name in dir(GlobalOptions) or name in self.__dict__:
+            return getattr(self, name)
+        elif name in self._options:
+            return self._options[name]
+        else:
+            raise AttributeError("'%s' has no attribute '%s'" % (
+                self.__class__.__name__, name))
+
+options = GlobalOptions()
+
+
+def get_filepath(output_dir, index):
+    filename = '%s_%s.jpg' % (index, uuid.uuid4().__str__().replace('-', ''))
     return os.path.join(output_dir, filename)
 
 
 def get_xpath_by_url(url):
-    '''根据url确定搜索引擎,从而确定图片的正则匹配'''
+    '''
+    :param url: image page's url of a certain image-search-engine
+    :return: xpath of images
+    '''
     substring = url[:url.index('/', len('https://'))]
     _map = {
-        'sogou': '//div[@id="imgid"]/ul/li/a/img',
-        'baidu': '//div[@id="imgid"]/div/ul/li/div/a/img',
-        'so.com': '//div[@id="waterfallX"]/div/ul/li/a/img',  # 360搜索
-        'yahoo': '//div[@id="res-cont"]/section/div/ul/li/a/img',
-        'bing.com': '//div[@id="dg_c"]/div/div[@class="imgres"]/div/div/a/img',
         'google': '//div[@id="ires"]/div/div[@id="isr_mc"]/div/div/div/div/a/img',
+        'bing.com': '//div[@id="dg_c"]/div/div[@class="imgres"]/div/div/a/img',
+        'yahoo': '//div[@id="res-cont"]/section/div/ul/li/a/img',
+        'baidu': '//div[@id="imgid"]/div/ul/li/div/a/img',  # baidu, china
+        'sogou': '//div[@id="imgid"]/ul/li/a/img',  # sogou, china
+        'so.com': '//div[@id="waterfallX"]/div/ul/li/a/img',  # 360, china
     }
     for k in _map.keys():
         if k in substring:
             return _map[k]
-    raise AssertionError('can only deal with %s, %s is not defined. you should add by yourself.' % (_map.keys(), substring))
+    raise AssertionError('%s is not defined in %s.' % (substring, _map.keys()))
 
 
-def download_image(img_url, filename):
-    if img_url.startswith('data:'):  # google或者百度图片有这种形式的图片,data:image/jpeg;开头
-        urllib.urlretrieve(img_url, filename)
-        return
-    headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.93 Safari/537.36;'}
-    r = requests.get(img_url, headers=headers, stream=True, timeout=10)
-    with open(filename, 'wb') as f_write:
-        f_write.write(r.raw.read())
+def get_url_by_word_engine(word, engine):
+    '''
+    :param word: keyword to search images
+    :param engine: search engine, choice in google/bing/yahoo/baidu/sogou/360
+    '''
+    engine = engine.lower()
+    _map = {
+        'google': 'https://www.google.com/search?q=%s&tbm=isch' % word,
+        'bing': 'http://www.bing.com/images/search?q=%s&FORM=IGRE' % word,
+        'yahoo': 'https://sg.images.search.yahoo.com/search/images?p=%s' % word,
+        'baidu': 'http://image.baidu.com/search/index?tn=baiduimage&word=%s' % word,
+        'sogou': 'http://pic.sogou.com/pics?query=%s' % word,
+        '360': 'http://image.so.com/i?q=%s' % word,
+    }
+    if engine not in _map:
+        raise AssertionError('%s is not defined in %s.' % (engine, _map.keys()))
+    return _map[engine]
 
 
-def unicode2str(string, encoding='utf-8'):
-    if isinstance(string, unicode):
-        return string.encode(encoding, 'replace')
-    return str(string)
+def print_msg(msg):
+    if not options.quiet:
+        print(msg)
+
+
+def _download_image(a_tuple):
+    img_url, filepath = a_tuple
+    try:
+        if img_url.startswith('data:'):  # base64 encoding image, startswith `data:image/jpeg`
+            urlretrieve(img_url, filepath)
+            img_url = 'data:'
+        else:
+            urlretrieve(img_url, filepath)
+            # headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) '
+            #         'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.93 Safari/537.36;'}
+            # r = requests.get(img_url, headers=headers, stream=True, timeout=DOWNLOAD_TIMEOUT)
+            # with open(filepath, 'wb') as f_write:
+            #     for chunk in r.iter_content(1024 * 1024):
+            #         f_write.write(chunk)
+        # end if-else
+        print_msg('save %s to %s' % (img_url, filepath))
+    except:
+        if DEBUG:
+            print_msg(traceback.format_exc())
+        print_msg('fail to download %s' % img_url)
 
 
 class Pisces(object):
 
-    def __init__(self, quiet=False, close=True, browser=None, retry_count=1):
+    def __init__(self, quiet=False, browser=None):
         '''
-        @param quiet 是否打印过程输出
-        @param close 是否在运行结束后关闭浏览器
-        @param browser 使用的浏览器类型,firefox/chrome/ie/opera/safari
+        :param quiet: no output
+        :param browser: web-browser to use, firefox/chrome/ie/opera/safari/phantomjs
         '''
         self.quiet = quiet
-        self.close = close
-        self.retry_count = retry_count
+        options._options = {'quiet': quiet}  # set global options
         browser = (browser or 'firefox').lower()
-        assert browser in ['firefox', 'chrome', 'ie', 'opera', 'safari']
+        assert browser in ['firefox', 'chrome', 'ie', 'opera', 'safari', 'phantomjs']
         self.browser = browser
+        self.driver = None
 
-    def download_by_url(self, url, output_dir, image_count=200):
-        '''
-        @brief 根据某个搜索地址,下载搜索的图片结果到output_dir,下载上限image_count
-        @param url 搜索地址url
-        @param output_dir 图片保存路径
-        @param image_count 搜索图片的最大值
-        @return 下载的图片数量
-        '''
-        img_url_dic = {}  # 记录下载过的图片地址，避免重复下载
-        pos = 0  # 滚动条位置,模拟滚动窗口以浏览下载更多图片
-        m = 1  # 图片编号
-        xpath = get_xpath_by_url(url)
-        if not os.path.exists(output_dir):  # 确保文件夹存在
-            os.system('mkdir -p %s' % output_dir)
-        # 启动Firefox浏览器
+    def decide_driver(self):
         if self.browser == 'chrome':
-            # chromedriver to see http://chromedriver.storage.googleapis.com/index.html
-            # If it cannot run, please check the version of chromedriver; I use version=2.9
-            os.environ["webdriver.chrome.driver"] = CHROMEDRIVER
+            # To see http://chromedriver.storage.googleapis.com/index.html for chromedriver.
+            # If it cann't run, please check out chromedriver's version and upgrade to the newest.
             driver = webdriver.Chrome(CHROMEDRIVER)
         else:
             driver = getattr(webdriver, self.browser.title())()
-        # driver = webdriver.Firefox()
-        # 最大化窗口，因为每一次爬取只能看到视窗内的图片
-        driver.maximize_window()
-        # 浏览器打开爬取页面
+        return driver
+
+    def download_threading(self, url_path_list):
+        pool = Pool()  # default to cpu count
+        pool.map(_download_image, url_path_list)
+        pool.close()
+        pool.join()
+
+    def download_by_url(self, url, output_dir, image_count=200):
+        '''
+        :param url: url in web-browser
+        :param output_dir: destination to save images
+        :param image_count: image count downloaded
+        :return: image count downloaded actually
+        '''
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+
+        driver = self.decide_driver()
+        driver.maximize_window()  # TODO: no working
         driver.get(url)
-        real_zero_count = 0
-        while m <= image_count:
-            pos += 500  # 每次下滚500px
+
+        xpath = get_xpath_by_url(url)
+        add_image_count = 0
+        empty_retry_count = 3
+        loop_zero_count = 0  # the count of getting nothing in a loop
+        pos = 0  # the position of the scroll bar
+
+        while add_image_count < image_count:
+            pos += 500  # scroll down 500px
             js = "document.documentElement.scrollTop=%d" % pos
             driver.execute_script(js)
-            driver.implicitly_wait(1)  # wait 1 second
+            driver.implicitly_wait(AJAX_TIME)  # wait n seconds
 
-            new_image_add = 0
-            for element in driver.find_elements_by_xpath(xpath):
+            loop_image_list = []
+            loop_image_count = 0
+            for element in driver.find_elements_by_xpath(xpath)[add_image_count:]:
                 img_url = element.get_attribute('src')
-                # 保存图片到指定路径
-                if img_url and img_url not in img_url_dic:
-                    img_url_dic[img_url] = ''
-                    new_image_add += 1
-                    real_zero_count = 0
-                    filename = get_local_path(output_dir, m)
-                    try:
-                        download_image(img_url, filename)  # 保存图片
-                    except:
-                        logging.error(traceback.format_exc())
-                    else:
-                        if not self.quiet:
-                            print('save', img_url, 'to', filename)
-                        m += 1
-                        if m > image_count:
-                            break
-            if new_image_add == 0:
-                print('no more images loaded...')
-                real_zero_count += 1
-                if real_zero_count > self.retry_count:
+                if img_url:
+                    loop_zero_count = 0  # reset to zero
+                    add_image_count += 1  # all add one
+                    loop_image_count += 1  # this loop add one
+                    filepath = get_filepath(output_dir, add_image_count)
+                    loop_image_list.append((img_url, filepath, ))
+                    if add_image_count >= image_count:
+                        break
+            if loop_image_list:
+                self.download_threading(loop_image_list)
+            if loop_image_count == 0:
+                loop_zero_count += 1
+                if loop_zero_count > empty_retry_count:
                     break
-        # 关闭浏览器该标签页
-        if self.close:
-            driver.close()
-        return m - 1
+                print_msg('no more images loaded, try %s ...' % loop_zero_count)
+                time.sleep(AJAX_TIME)
+        # close browser
+        if driver and hasattr(driver, 'quit'):
+            driver.quit()
+        return add_image_count
 
     def download_by_word(self, word, engine, output_dir, image_count=200):
         '''
-        @brief 根据关键词与搜索引擎,进行搜索并下载图片到output_dir.
-        @param word 关键词
-        @param engine 搜索引擎:google/baidu/yahoo/bing/sogou/360
+        search images by `word` using `engine`, download images to `output_dir`
+        :param word: keyword to search images
+        :param engine: search engine, choice in google/bing/yahoo/baidu/sogou/360
         '''
-        word = unicode2str(word)
-        engine = engine.lower()
-        _map = {
-            'sogou': 'http://pic.sogou.com/pics?query=%s' % word,
-            'baidu': 'http://image.baidu.com/search/index?tn=baiduimage&word=%s' % word,
-            '360': 'http://image.so.com/i?q=%s' % word,
-            'google': 'https://www.google.com/search?q=%s&tbm=isch' % word,
-            'bing': 'http://www.bing.com/images/search?q=%s&FORM=IGRE' % word,
-            'yahoo': 'https://sg.images.search.yahoo.com/search/images?p=%s' % word,
-        }
-        if engine not in _map:
-            raise AssertionError('search engine not defined: %s' % engine)
-        url = _map[engine]
+        url = get_url_by_word_engine(word, engine)
         return self.download_by_url(url, output_dir, image_count=image_count)
