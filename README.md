@@ -1,26 +1,26 @@
-[![PyPI](https://img.shields.io/pypi/v/pisces-image.svg)](https://pypi.python.org/pypi/pisces-image)
+[![PyPI](https://img.shields.io/pypi/v/python-pisces.svg)](https://pypi.python.org/pypi/python-pisces)
 
 ## Why use pisces?
 
 This project origins from the needs of image dataset for algorithm training.
 
-Image search engines, such as Google, are quite powerful now. It's enough if we could use it.
-However, it doesn't provide convenient API for us.
+Image search engines, such as Google, are quite powerful now. They are enough if we could use them.
+However, they didn't provide convenient API for us.
 
-Pisces uses selenuim, which can work with the mainstream browsers to download the images we need.
+Pisces uses [selenuim](https://www.seleniumhq.org/), which can work with mainstream browsers to download the images we need.
 Pisces supports these search engines: google, yahoo, bing, baidu(china), sogou(china), 360(china), and more in the future.
 
 本项目起源于算法训练需要图像数据集的需求.
 
 现有的图片搜索引擎,比如Google,相当强大了,能够利用起来,已经可以满足我们的需求.然而,这些网站并没有提供方便的API让我们得到图片链接.
 
-Pisces使用了selenuim,可调用主流的浏览器下载搜索到的图片.Pisces还整合了其他的搜索引擎的搜索结果:google/yahoo/bing/百度/sogou/360,丰富可采集的数据集.
+Pisces使用了selenuim,可调用主流的浏览器下载搜索到的图片.Pisces还整合了其他的搜索引擎的搜索结果:google/yahoo/bing/百度/搜狗/360.
 
 ## Installation
 
 Use pip:
 
-    pip install pisces-image
+    pip install python-pisces
 
 
 ## Console Command
@@ -34,7 +34,7 @@ download images with 8 threads parallelly and then restore these images in "./ou
 
 If you're in China, you're recommended to use `-e baidu` instand of `-e google`(default), because of some network problems. (在中国由于一些网络原因，推荐使用参数`-e baidu`，而不是默认的`-e google`)
 
-![image](./output-overview.png)
+![image](https://raw.githubusercontent.com/wolfhong/python-pisces/develop/output-overview.png)
 
 Use `pisces -h` to show the usage:
 
@@ -69,7 +69,7 @@ Use `pisces -h` to show the usage:
 ```
 
 `pisces` console command can work on any platform: windows, linux, mac, and it had beed fully tested.
-If not, you're welcome to [file an issue](https://github.com/wolfhong/pisces/issues).
+If not, you're welcome to [file an issue](https://github.com/wolfhong/python-pisces/issues).
 
 More examples:
     
@@ -108,6 +108,6 @@ Pisces can also be included in your projects:
 Pisces is just a tools to search for and download images, using image search engine such as google, bing, baidu, etc.
 I hope it can help you in somewhere.
 
-* [Issue tracker](https://github.com/wolfhong/pisces/issues?status=new&status=open)
-* [Current Source on GitHub](https://github.com/wolfhong/pisces)
-* [PyPI](https://pypi.python.org/pypi/pisces-image)
+* [Issue tracker](https://github.com/wolfhong/python-pisces/issues?status=new&status=open)
+* [Source Code](https://github.com/wolfhong/python-pisces)
+* [PyPI](https://pypi.python.org/pypi/python-pisces)

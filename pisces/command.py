@@ -9,7 +9,8 @@ unicode_type = unicode if sys.version_info[0] == 2 else str
 
 
 def create_parser():
-    parser = ArgumentParser(description="Use keywords to search for and download images.")
+    parser = ArgumentParser(description="Use keywords to search for and download images. "
+            "More info on <https://github.com/wolfhong/python-pisces>")
     parser.add_argument('-q', '--quiet',
                         action="store_true",
                         default=False,
