@@ -1,46 +1,113 @@
+[![PyPI](https://img.shields.io/pypi/v/pisces-image.svg)](https://pypi.python.org/pypi/pisces-image)
+
 ## Why use pisces?
-The project origins from the needs of image data-set for algorithm training.
 
-Image search engines, such as Google, are quite powerful now. It's enough if we can use them. However, these sites don't provide convenient API for us.
+This project origins from the needs of image dataset for algorithm training.
 
-Pisces uses selenuim, which can work with the mainstream browsers to download the images we need. Pisces incorporates the search engines: google, yahoo, bing, Baidu, sogou, 360, and more in the future.
+Image search engines, such as Google, are quite powerful now. It's enough if we could use it.
+However, it doesn't provide convenient API for us.
+
+Pisces uses selenuim, which can work with the mainstream browsers to download the images we need.
+Pisces supports these search engines: google, yahoo, bing, baidu(china), sogou(china), 360(china), and more in the future.
 
 本项目起源于算法训练需要图像数据集的需求.
 
 现有的图片搜索引擎,比如Google,相当强大了,能够利用起来,已经可以满足我们的需求.然而,这些网站并没有提供方便的API让我们得到图片链接.
 
-pisces使用了selenuim,可调用主流的浏览器下载搜索到的图片.pisces还整合了其他的搜索引擎的搜索结果:google/yahoo/bing/百度/sogou/360,丰富可采集的数据集.
+Pisces使用了selenuim,可调用主流的浏览器下载搜索到的图片.Pisces还整合了其他的搜索引擎的搜索结果:google/yahoo/bing/百度/sogou/360,丰富可采集的数据集.
 
 ## Installation
-- clone the code and enter the folder
-- python install setup.py
-- or you can directly place the pisces into your project.
+
+Use pip:
+
+    pip install pisces-image
 
 
-## Example
+## Console Command
 
-    # -*- coding: utf-8 -*-
+Once you have installed Pisces, you can easily use it to search for and download images:
+
+    $ pisces -e google --display -w 8 -n 500 fire "kitchen fire" -o ./output
+
+The above command will start up chromedriver and then google "fire" and "kitchen fire" with its image search engine,
+download images with 8 threads parallelly and then restore these images in "./output" directory.
+
+If you're in China, you're recommended to use `-e baidu` instand of `-e google`(default), because of some network problems. (在中国由于一些网络原因，推荐使用参数`-e baidu`，而不是默认的`-e google`)
+
+![image](./output-overview.png)
+
+Use `pisces -h` to show the usage:
+
+``` console
+    usage: command.py [-h] [-q] [--display] [-e ENGINE] [-w WORKERS] [-n NUMBER]
+                  [-o OUTPUT_DIR] [-v]
+                  [keywords [keywords ...]]
+
+    Use keywords to search for and download images.
+
+    positional arguments:
+      keywords              keywords to search for images
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -q, --quiet           quiet (no output)
+      --display             work with a graphical display
+      -e ENGINE, --engine ENGINE
+                            the image search engine you want to use, default to
+                            google. select within [google, bing, yahoo, baidu,
+                            sougou, 360]
+      -w WORKERS, --workers WORKERS
+                            the number of threads when downloading images, default
+                            to the cpu count
+      -n NUMBER, --number NUMBER
+                            the max number of images you want to download, default
+                            to 100
+      -o OUTPUT_DIR, --output_dir OUTPUT_DIR
+                            destination to store downloaded images, default to
+                            ./output
+      -v, --version         print the version and exit
+```
+
+`pisces` console command can work on any platform: windows, linux, mac, and it had beed fully tested.
+If not, you're welcome to [file an issue](https://github.com/wolfhong/pisces/issues).
+
+More examples:
+    
+``` console
+    $ pisces "kitchen fire" "forest fire"
+    $ pisces -n500 "厨房火灾" "森林火灾"
+    $ pisces -e baidu -n500 -o path-to-output 火灾 水灾
+```
+
+## Code Example
+
+Pisces can also be included in your projects:
+
+``` python
     from pisces import Pisces
 
-    if __name__ == '__main__':
-        # image search keyword: kitchen fire
-        url = 'https://www.google.com/search?safe=strict&hl=zh-CN&site=imghp&tbm=isch&source=hp&biw=1372&bih=661&q=%E7%81%AB%E7%81%BE&oq=%E7%81%AB%E7%81%BE&gs_l=img.3...1527.6030.0.6271.25.13.7.0.0.0.333.333.3-1.1.0....0...1ac.1j4.64.img..18.7.33...0.m7j-m12CPV0'
-        # if you are in china, use the url below instand.
-        # url = 'http://image.baidu.com/search/index?tn=baiduimage&ipn=r&ct=201326592&cl=2&lm=-1&st=-1&fm=result&fr=&sf=1&fmq=&pv=&ic=0&nc=1&z=&se=&showtab=0&fb=0&width=&height=&face=0&istype=2&ie=utf-8&word=%E7%81%AB%E7%81%BE'
+    # recommended to use `with`:
+    with Pisces(quiet=False, headless=False) as client:
+        output_dir = './output_water/'
+        client.download_by_word('water', output_dir, engine='google', image_count=20)
 
-        output_dir = '/tmp/output_fire/'
-        client = Pisces(quiet=False, close=True, browser='firefox')
-        # similar to: client = Pisces()
-        client.download_by_url(url, output_dir, image_count=100)
+    # or call `close()` handly:
+    client = Pisces(quiet=False, headless=True, workers=4)
+    output_dir = './output_fire/'
+    client.download_by_word('fire', output_dir, engine='baidu', image_count=20)
+    client.close()
+```
 
-        output_dir = '/tmp/output_water/'
-        # use google to download image with keyword: water
-        client.download_by_word('water', 'google', output_dir, image_count=100)
+## Tips
 
+- The code uses selenuim. More info to see [ReadTheDocs](http://selenium-python.readthedocs.io/installation.html)
+- If you're in China, you're recommended to use `-e baidu` instand of `-e google`(default), because of some network problems.
 
-## Tip
-- The code uses selenuim. Selenium Python bindings provides a simple API to write functional/acceptance tests using Selenium WebDriver. More info to see http://selenium-python.readthedocs.io/installation.html
-- default browser is firefox;
-- tools/chromedriver is only for chrome, to see http://chromedriver.storage.googleapis.com/index.html for more info.
-- browser safari/IE/opera may not work if you don't have any support
-- I recommend to use the default browser - firefox.
+## About
+
+Pisces is just a tools to search for and download images, using image search engine such as google, bing, baidu, etc.
+I hope it can help you in somewhere.
+
+* [Issue tracker](https://github.com/wolfhong/pisces/issues?status=new&status=open)
+* [Current Source on GitHub](https://github.com/wolfhong/pisces)
+* [PyPI](https://pypi.python.org/pypi/pisces-image)

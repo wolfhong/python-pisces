@@ -9,11 +9,11 @@ unicode_type = unicode if sys.version_info[0] == 2 else str
 
 
 def create_parser():
-    parser = ArgumentParser(description="Using keywords to search for and download images.")
+    parser = ArgumentParser(description="Use keywords to search for and download images.")
     parser.add_argument('-q', '--quiet',
                         action="store_true",
                         default=False,
-                        help="quiet(no output)")
+                        help="quiet (no output)")
     parser.add_argument('--display',
                         action="store_true",
                         default=False,
@@ -21,7 +21,7 @@ def create_parser():
     parser.add_argument('-e', '--engine',
                         action="store",
                         default="google",
-                        help="image search engine you want to use, default to google. "
+                        help="the image search engine you want to use, default to google. "
                         "select within [google, bing, yahoo, baidu, sougou, 360]")
     parser.add_argument('-w', '--workers',
                         action="store",
@@ -36,12 +36,12 @@ def create_parser():
     parser.add_argument('-o', '--output_dir',
                         action="store",
                         default='./output',
-                        help="destination to store downloaded images, default to ./output"
+                        help="destination to restore downloaded images, default to ./output"
                         )
     parser.add_argument('keywords',
                         action="store",
                         nargs='*',
-                        help="keywords to search images")
+                        help="keywords to search for images")
     parser.add_argument('-v', '--version',
                         action="store_true",
                         default=False,
@@ -65,7 +65,10 @@ def main():
     with Pisces(quiet=args.quiet, headless=not args.display, workers=args.workers) as client:
         for word in keywords:
             output_dir = os.path.join(args.output_dir, word)
-            client.download_by_word(word, args.engine, output_dir, image_count=args.number)
+            output_dir = '_'.join(output_dir.split())
+            client.download_by_word(word, output_dir,
+                    engine=args.engine,
+                    image_count=args.number)
     sys.exit(0)
 
 if __name__ == '__main__':

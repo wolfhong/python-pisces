@@ -105,3 +105,4 @@ ENV/
 
 # mac
 .DS_Store
+output*/

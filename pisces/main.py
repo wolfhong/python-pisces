@@ -11,9 +11,9 @@ from multiprocessing.dummy import Pool
 import requests
 from selenium import webdriver
 
-DEBUG = False
+DEBUG = True
 DOWNLOAD_TIMEOUT = 5  # seconds
-AJAX_TIME = 2  # seconds for implicitly_wait
+AJAX_TIME = 0.5  # seconds for implicitly_wait
 RETRY_WAIT_TIME = 2  # seconds
 PY3 = sys.version_info[0] == 3  # True/False
 
@@ -167,30 +167,28 @@ class Pisces(object):
         pool.close()
         pool.join()
 
-    def download_by_url(self, url, output_dir, image_count=200):
+    def download_by_url(self, url, output_dir, image_count=100):
         '''
         :param url: url in web-browser
         :param output_dir: destination to save images
         :param image_count: image count downloaded
         :return: image count downloaded actually
         '''
-        output_dir = '_'.join(output_dir.split())
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)  # equal to `mkdir -p output_dir`
 
         driver = self.driver
-        driver.maximize_window()  # TODO: no working on mac
+        driver.maximize_window()  # TODO: not work on mac
         driver.get(url)
 
         xpath = get_xpath_by_url(url)
         add_image_count = 0
         empty_retry_count = 3
         loop_zero_count = 0  # the count of getting nothing in a loop
-        pos = 0  # the position of the scroll bar
 
         while add_image_count < image_count:
-            pos += 500  # scroll down 500px
-            js = "document.documentElement.scrollTop=%d" % pos
+            # js = "document.documentElement.scrollTop=%d" % pos
+            js = "window.scrollTo(0, document.body.scrollHeight);"
             driver.execute_script(js)
             driver.implicitly_wait(AJAX_TIME)  # wait n seconds
 
@@ -206,6 +204,8 @@ class Pisces(object):
                     loop_image_list.append((img_url, filepath, ))
                     if add_image_count >= image_count:
                         break
+
+            driver.execute_script(js)  # scrollDown in advance
             if loop_image_list:
                 self.download_threading(loop_image_list)
             if loop_image_count == 0:
@@ -216,7 +216,7 @@ class Pisces(object):
                 time.sleep(RETRY_WAIT_TIME)
         return add_image_count
 
-    def download_by_word(self, word, engine, output_dir, image_count=200):
+    def download_by_word(self, word, output_dir, engine='google', image_count=100):
         '''
         search images by `word` using `engine`, download images to `output_dir`
         :param word: keyword to search images
