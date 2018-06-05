@@ -26,11 +26,11 @@ else:
 # see http://chromedriver.storage.googleapis.com/index.html for chromedriver.
 ROOT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 if sys.platform == 'darwin':
-    CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools/chromedriver_mac')
+    CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools', 'chromedriver_mac')
 elif sys.platform == 'linux':
-    CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools/chromedriver_linux')
+    CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools', 'chromedriver_linux')
 elif sys.platform in ['win32', 'cygwin']:
-    CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools/chromedriver.exe')
+    CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools', 'chromedriver.exe')
 
 
 class GlobalOptions(object):
@@ -123,28 +123,27 @@ def _download_image(a_tuple):
 
 class Pisces(object):
 
-    def __init__(self, quiet=False, browser=None, workers=0):
+    def __init__(self, quiet=False, headless=True, workers=0):
         '''
         :param quiet: no output
-        :param browser: web-browser to use, firefox/chrome/ie/opera/safari/phantomjs
+        :param headless: no UI(no graphical display)
         :param workers: the number of threads when downloading images, `0` means the cpu count
         '''
-        self.quiet = quiet
-        options._options = {'quiet': quiet}  # set global options
-        browser = (browser or 'chrome').lower()
+        browser = 'chrome'
         assert browser in ['firefox', 'chrome', 'ie', 'opera', 'safari', 'phantomjs']
-        self.browser = browser
-        self.workers = int(workers)
-        self.driver = self.decide_driver()
 
-    def decide_driver(self):
-        if self.browser == 'chrome':
-            # To see http://chromedriver.storage.googleapis.com/index.html for chromedriver.
-            # If it cann't run, please check out chromedriver's version and upgrade to the newest.
-            driver = webdriver.Chrome(CHROMEDRIVER)
-        else:
-            driver = getattr(webdriver, self.browser.title())()
-        return driver
+        options._options = {'quiet': quiet}  # set global options
+        self.quiet = quiet
+        self.workers = int(workers)
+        self.headless = headless
+
+        # To see http://chromedriver.storage.googleapis.com/index.html for chromedriver.
+        # If it cann't run, please check out chromedriver's version and upgrade to the newest.
+        opt = None
+        if self.headless:
+            opt = webdriver.chrome.options.Options()
+            opt.set_headless(headless=True)
+        self.driver = webdriver.Chrome(CHROMEDRIVER, options=opt)
 
     def close(self):
         if self.driver and hasattr(self.driver, 'quit'):

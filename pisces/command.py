@@ -14,11 +14,15 @@ def create_parser():
                         action="store_true",
                         default=False,
                         help="quiet(no output)")
+    parser.add_argument('--display',
+                        action="store_true",
+                        default=False,
+                        help="work with a graphical display")
     parser.add_argument('-e', '--engine',
                         action="store",
                         default="google",
-                        choices=["google", "bing", "yahoo", "baidu", "sougou", "360"],
-                        help="image search engine you want to use, default to google")
+                        help="image search engine you want to use, default to google. "
+                        "select within [google, bing, yahoo, baidu, sougou, 360]")
     parser.add_argument('-w', '--workers',
                         action="store",
                         default=0,
@@ -26,9 +30,9 @@ def create_parser():
                         help="the number of threads when downloading images, default to the cpu count")
     parser.add_argument('-n', '--number',
                         action="store",
-                        default=200,
+                        default=100,
                         type=int,
-                        help="the max number of images you want to download, default to 200")
+                        help="the max number of images you want to download, default to 100")
     parser.add_argument('-o', '--output_dir',
                         action="store",
                         default='./output',
@@ -58,7 +62,7 @@ def main():
     for i, word in enumerate(keywords):
         if not isinstance(word, unicode_type):
             keywords[i] = word.decode(sys.stdin.encoding)
-    with Pisces(quiet=args.quiet, workers=args.workers) as client:
+    with Pisces(quiet=args.quiet, headless=not args.display, workers=args.workers) as client:
         for word in keywords:
             output_dir = os.path.join(args.output_dir, word)
             client.download_by_word(word, args.engine, output_dir, image_count=args.number)
