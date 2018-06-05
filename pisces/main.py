@@ -11,11 +11,11 @@ from multiprocessing.dummy import Pool
 import requests
 from selenium import webdriver
 
-DEBUG = True
+DEBUG = False
 DOWNLOAD_TIMEOUT = 5  # seconds
 AJAX_TIME = 2  # seconds for implicitly_wait
 RETRY_WAIT_TIME = 2  # seconds
-PY3 = True if sys.version_info[0] == 3 else False
+PY3 = sys.version_info[0] == 3  # True/False
 
 if PY3:
     from urllib.request import urlretrieve
@@ -131,10 +131,11 @@ class Pisces(object):
         '''
         self.quiet = quiet
         options._options = {'quiet': quiet}  # set global options
-        browser = (browser or 'firefox').lower()
+        browser = (browser or 'chrome').lower()
         assert browser in ['firefox', 'chrome', 'ie', 'opera', 'safari', 'phantomjs']
         self.browser = browser
         self.workers = int(workers)
+        self.driver = self.decide_driver()
 
     def decide_driver(self):
         if self.browser == 'chrome':
@@ -144,6 +145,17 @@ class Pisces(object):
         else:
             driver = getattr(webdriver, self.browser.title())()
         return driver
+
+    def close(self):
+        if self.driver and hasattr(self.driver, 'quit'):
+            self.driver.quit()
+            self.driver = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self.close()
 
     def download_threading(self, url_path_list):
         # for img_url, filepath in url_path_list:
@@ -163,10 +175,11 @@ class Pisces(object):
         :param image_count: image count downloaded
         :return: image count downloaded actually
         '''
+        output_dir = '_'.join(output_dir.split())
         if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
+            os.makedirs(output_dir)  # equal to `mkdir -p output_dir`
 
-        driver = self.decide_driver()
+        driver = self.driver
         driver.maximize_window()  # TODO: no working on mac
         driver.get(url)
 
@@ -202,9 +215,6 @@ class Pisces(object):
                     break
                 print_msg('no more images loaded, try %s ...' % loop_zero_count)
                 time.sleep(RETRY_WAIT_TIME)
-        # close browser
-        if driver and hasattr(driver, 'quit'):
-            driver.quit()
         return add_image_count
 
     def download_by_word(self, word, engine, output_dir, image_count=200):

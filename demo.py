@@ -8,10 +8,19 @@ if __name__ == '__main__':
     # If you are in china, use the url below instand, because of the network.
     # url = 'http://image.baidu.com/search/index?tn=baiduimage&ipn=r&ct=201326592&cl=2&lm=-1&st=-1&fm=result&fr=&sf=1&fmq=&pv=&ic=0&nc=1&z=&se=&showtab=0&fb=0&width=&height=&face=0&istype=2&ie=utf-8&word=%E7%81%AB%E7%81%BE'
 
-    output_dir = './output_fire/'
-    client = Pisces(quiet=False, browser='chrome')
-    client.download_by_url(url, output_dir, image_count=100)
+    # with Pisces(quiet=False, browser='chrome') as client:
+    #     output_dir = './output_fire/'
+    #     client.download_by_url(url, output_dir, image_count=20)
 
-    # output_dir = './output_water/'
+    #     # use google to download image with keyword: water
+    #     output_dir = './output_water/'
+    #     client.download_by_word('water', 'google', output_dir, image_count=20)
+
+    client = Pisces(quiet=False, browser='chrome')
+    output_dir = './output_fire/'
+    client.download_by_url(url, output_dir, image_count=20)
+
     # use google to download image with keyword: water
-    # client.download_by_word('water', 'google', output_dir, image_count=20)
+    output_dir = './output_water/'
+    client.download_by_word('water', 'google', output_dir, image_count=20)
+    client.close()
