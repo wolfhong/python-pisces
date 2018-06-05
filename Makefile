@@ -22,3 +22,4 @@ package: clean
 package-test: clean
 	$(PYTHON) setup.py sdist bdist_wheel --universal
 	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+	# pip install --index-url https://test.pypi.org/simple/ xxx

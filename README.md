@@ -22,6 +22,15 @@ Use pip:
 
     pip install python-pisces
 
+From source code:
+
+    git clone https://github.com/wolfhong/python-pisces.git
+    cd python-pisces
+
+    pip install -r requirements.txt
+    export PYTHONPATH=./
+    python scripts/update_chromedriver.py  # download newest chromedriver according to platform
+    python setup.py install
 
 ## Console Command
 

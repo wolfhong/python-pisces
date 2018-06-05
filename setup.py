@@ -38,7 +38,8 @@ setup(
         'google', 'baidu',
     ],
     license="MIT",
-    packages=['pisces', 'tools'],
+    packages=['pisces', ],
+    data_files=[('tools', ['tools/chromedriver_mac', 'tools/chromedriver_linux', 'tools/chromedriver.exe'])],
     platforms='any',
     install_requires=[
         'selenium>=2.53.6',
