@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# see https://www.seleniumhq.org/ for more info.
+# see https://www.seleniumhq.org/download for more info.
 from __future__ import unicode_literals, print_function
 import os
 import sys
 import uuid
 import time
 import traceback
-from multiprocessing import Pool
-# import requests
+from multiprocessing.dummy import Pool
+import requests
 from selenium import webdriver
 
 DEBUG = True
@@ -104,13 +104,13 @@ def _download_image(a_tuple):
             urlretrieve(img_url, filepath)
             img_url = 'data:'
         else:
-            urlretrieve(img_url, filepath)
-            # headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) '
-            #         'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.93 Safari/537.36;'}
-            # r = requests.get(img_url, headers=headers, stream=True, timeout=DOWNLOAD_TIMEOUT)
-            # with open(filepath, 'wb') as f_write:
-            #     for chunk in r.iter_content(1024 * 1024):
-            #         f_write.write(chunk)
+            # urlretrieve(img_url, filepath)
+            headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) '
+                    'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.93 Safari/537.36;'}
+            r = requests.get(img_url, headers=headers, stream=True, timeout=DOWNLOAD_TIMEOUT)
+            with open(filepath, 'wb') as f_write:
+                for chunk in r.iter_content(1024 * 1024):
+                    f_write.write(chunk)
         # end if-else
         print_msg('save %s to %s' % (img_url, filepath))
     except:
@@ -143,6 +143,8 @@ class Pisces(object):
         return driver
 
     def download_threading(self, url_path_list):
+        # for img_url, filepath in url_path_list:
+        #     _download_image((img_url, filepath))
         pool = Pool()  # default to cpu count
         pool.map(_download_image, url_path_list)
         pool.close()
