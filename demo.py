@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     output_dir = './output_fire/'
     client = Pisces(quiet=False, browser='chrome')
-    client.download_by_url(url, output_dir, image_count=20)
+    client.download_by_url(url, output_dir, image_count=100)
 
     # output_dir = './output_water/'
     # use google to download image with keyword: water

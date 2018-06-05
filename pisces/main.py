@@ -14,6 +14,7 @@ from selenium import webdriver
 DEBUG = True
 DOWNLOAD_TIMEOUT = 5  # seconds
 AJAX_TIME = 2  # seconds for implicitly_wait
+RETRY_WAIT_TIME = 2  # seconds
 PY3 = True if sys.version_info[0] == 3 else False
 
 if PY3:
@@ -49,6 +50,7 @@ options = GlobalOptions()
 
 
 def get_filepath(output_dir, index):
+    ''' all format images are rename to *.jpg, regardless of png, bmp or others '''
     filename = '%s_%s.jpg' % (index, uuid.uuid4().__str__().replace('-', ''))
     return os.path.join(output_dir, filename)
 
@@ -100,11 +102,11 @@ def print_msg(msg):
 def _download_image(a_tuple):
     img_url, filepath = a_tuple
     try:
-        if img_url.startswith('data:'):  # base64 encoding image, startswith `data:image/jpeg`
+        if img_url.startswith('data:'):  # base64 encoding image, startswith `data:`
             urlretrieve(img_url, filepath)
-            img_url = 'data:'
+            img_url = 'data:<base64>'
         else:
-            # urlretrieve(img_url, filepath)
+            # urlretrieve(img_url, filepath)  # 403 on py3.6(NT) with baidu, changed to `requests` lib
             headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) '
                     'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.93 Safari/537.36;'}
             r = requests.get(img_url, headers=headers, stream=True, timeout=DOWNLOAD_TIMEOUT)
@@ -121,17 +123,18 @@ def _download_image(a_tuple):
 
 class Pisces(object):
 
-    def __init__(self, quiet=False, browser=None):
+    def __init__(self, quiet=False, browser=None, workers=0):
         '''
         :param quiet: no output
         :param browser: web-browser to use, firefox/chrome/ie/opera/safari/phantomjs
+        :param workers: the number of threads when downloading images, `0` means the cpu count
         '''
         self.quiet = quiet
         options._options = {'quiet': quiet}  # set global options
         browser = (browser or 'firefox').lower()
         assert browser in ['firefox', 'chrome', 'ie', 'opera', 'safari', 'phantomjs']
         self.browser = browser
-        self.driver = None
+        self.workers = int(workers)
 
     def decide_driver(self):
         if self.browser == 'chrome':
@@ -145,7 +148,10 @@ class Pisces(object):
     def download_threading(self, url_path_list):
         # for img_url, filepath in url_path_list:
         #     _download_image((img_url, filepath))
-        pool = Pool()  # default to cpu count
+        if self.workers <= 0:
+            pool = Pool()  # default to cpu count
+        else:
+            pool = Pool(self.workers)
         pool.map(_download_image, url_path_list)
         pool.close()
         pool.join()
@@ -161,7 +167,7 @@ class Pisces(object):
             os.mkdir(output_dir)
 
         driver = self.decide_driver()
-        driver.maximize_window()  # TODO: no working
+        driver.maximize_window()  # TODO: no working on mac
         driver.get(url)
 
         xpath = get_xpath_by_url(url)
@@ -195,7 +201,7 @@ class Pisces(object):
                 if loop_zero_count > empty_retry_count:
                     break
                 print_msg('no more images loaded, try %s ...' % loop_zero_count)
-                time.sleep(AJAX_TIME)
+                time.sleep(RETRY_WAIT_TIME)
         # close browser
         if driver and hasattr(driver, 'quit'):
             driver.quit()
