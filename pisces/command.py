@@ -23,7 +23,7 @@ def create_parser():
                         action="store",
                         default="google",
                         help="the image search engine you want to use, default to google. "
-                        "select within [google, bing, yahoo, baidu, sougou, 360]")
+                        "select within [google, bing, yahoo, baidu]")
     parser.add_argument('-w', '--workers',
                         action="store",
                         default=0,

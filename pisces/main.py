@@ -61,9 +61,10 @@ def get_xpath_by_url(url):
     :return: xpath of images
     '''
     substring = url[:url.index('/', len('https://'))]
+    # can work on 2018/6/5
     _map = {
         'google': '//div[@id="ires"]/div/div[@id="isr_mc"]/div/div/div/div/a/img',
-        'bing.com': '//div[@id="dg_c"]/div/div[@class="imgres"]/div/div/a/img',
+        'bing.com': '//div[@class="dg_b"]//div[@class="img_cont hoff"]/img',
         'yahoo': '//div[@id="res-cont"]/section/div/ul/li/a/img',
         'baidu': '//div[@id="imgid"]/div/ul/li/div/a/img',  # baidu, china
         'sogou': '//div[@id="imgid"]/ul/li/a/img',  # sogou, china

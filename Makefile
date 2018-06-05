@@ -1,7 +1,10 @@
 PYTHON := python
 PYTEST := pytest
 
-.PHONY: test clean package package-test
+.PHONY: build test clean package package-test
+
+build:
+	PYTHONPATH=./ $(PYTHON) scripts/update_chromedriver.py
 
 test:
 	PYTHONPATH=./ $(PYTEST) -v tests/
