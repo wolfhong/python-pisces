@@ -25,9 +25,9 @@ else:
 
 # see http://chromedriver.storage.googleapis.com/index.html for chromedriver.
 ROOT_PATH = os.path.abspath(os.path.dirname(__file__))
-if sys.platform == 'darwin':
+if sys.platform.startswith('darwin'):
     CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools', 'chromedriver_mac')
-elif sys.platform == 'linux':
+elif sys.platform.startswith('linux'):
     CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools', 'chromedriver_linux')
 elif sys.platform in ['win32', 'cygwin']:
     CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools', 'chromedriver.exe')

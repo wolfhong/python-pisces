@@ -22,11 +22,11 @@ with open(current_file, 'w') as f_write:
 def decide_platform(mode='auto', platform=None):
     if mode == 'auto':
         platform = platform or sys.platform
-        if platform == 'darwin':
+        if platform.startswith('darwin'):
             origin_url = 'http://chromedriver.storage.googleapis.com/{}/chromedriver_mac64.zip'.format(latest_release)
             chromedriver = os.path.join(ROOT_PATH, 'tools', 'chromedriver_mac')
             unzip_file = os.path.join(ROOT_PATH, 'tools', 'chromedriver')
-        elif platform == 'linux':
+        elif platform.startswith('linux'):
             origin_url = 'http://chromedriver.storage.googleapis.com/{}/chromedriver_linux64.zip'.format(latest_release)
             chromedriver = os.path.join(ROOT_PATH, 'tools', 'chromedriver_linux')
             unzip_file = os.path.join(ROOT_PATH, 'tools', 'chromedriver')
