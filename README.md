@@ -20,6 +20,14 @@ Pisces使用了[selenuim](https://www.seleniumhq.org/), 可调用主流的浏览
 
 ## Installation
 
+First, make sure you have [chrome](https://www.google.com/chrome/) browser installed on your computer.
+If not, selenium gives "selenium.common.exceptions.WebDriverException: Message: unknown error: cannot find Chrome binary".
+
+If you're working on a server without interface (for example, CentOS), you can also follow the steps below to install it:
+
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
+    yum -y localinstall google-chrome-stable_current_x86_64.rpm
+
 Use pip:
 
     pip install python-pisces
@@ -62,13 +70,16 @@ Use `pisces -h` to show the usage:
     optional arguments:
       -h, --help            show this help message and exit
       -q, --quiet           quiet (no output)
-      --display             work with a graphical display
+      --display             start up browser with a graphical display, default to no
       -e ENGINE, --engine ENGINE
                             the image search engine you want to use, default to
                             google. select within [google, bing, yahoo, baidu]
+      -b BROWSER, --browser BROWSER
+                            the browser you have installed, default to chrome.
+                            select within [chrome, firefox] 
       -w WORKERS, --workers WORKERS
                             the number of threads when downloading images, default
-                            to the cpu count
+                            to cpu core count
       -n NUMBER, --number NUMBER
                             the max number of images you want to download, default
                             to 100
@@ -102,7 +113,7 @@ Pisces can also be included in your projects:
         client.download_by_word('water', output_dir, engine='google', image_count=20)
 
     # or call `close()` handly:
-    client = Pisces(quiet=False, headless=True, workers=4)
+    client = Pisces(quiet=False, headless=True, workers=4, browser='chrome')
     output_dir = './output_fire/'
     client.download_by_word('fire', output_dir, engine='baidu', image_count=20)
     client.close()

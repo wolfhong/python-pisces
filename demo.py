@@ -17,7 +17,7 @@ if __name__ == '__main__':
         client.download_by_word('water', output_dir, engine='baidu', image_count=20)
 
 
-    client = Pisces(quiet=False, headless=False, workers=3)
+    client = Pisces(quiet=False, headless=False, workers=3, browser='chrome')
     output_dir = './output_fire/'
     client.download_by_url(url, output_dir, image_count=20)
 

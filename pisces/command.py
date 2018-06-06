@@ -18,17 +18,22 @@ def create_parser():
     parser.add_argument('--display',
                         action="store_true",
                         default=False,
-                        help="work with a graphical display")
+                        help="start up browser with a graphical display, default to no")
     parser.add_argument('-e', '--engine',
                         action="store",
                         default="google",
                         help="the image search engine you want to use, default to google. "
                         "select within [google, bing, yahoo, baidu]")
+    parser.add_argument('-b', '--browser',
+                        action="store",
+                        default="chrome",
+                        help="the browser you have installed, default to chrome. "
+                        "select within [chrome, firefox]")
     parser.add_argument('-w', '--workers',
                         action="store",
                         default=0,
                         type=int,
-                        help="the number of threads when downloading images, default to the cpu count")
+                        help="the number of threads when downloading images, default to cpu core cout")
     parser.add_argument('-n', '--number',
                         action="store",
                         default=100,
@@ -63,7 +68,7 @@ def main():
     for i, word in enumerate(keywords):
         if not isinstance(word, unicode_type):
             keywords[i] = word.decode(sys.stdin.encoding)
-    with Pisces(quiet=args.quiet, headless=not args.display, workers=args.workers) as client:
+    with Pisces(quiet=args.quiet, headless=not args.display, workers=args.workers, browser=args.browser) as client:
         for word in keywords:
             output_dir = os.path.join(args.output_dir, word)
             output_dir = '_'.join(output_dir.split())

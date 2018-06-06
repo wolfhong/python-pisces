@@ -124,27 +124,42 @@ def _download_image(a_tuple):
 
 class Pisces(object):
 
-    def __init__(self, quiet=False, headless=True, workers=0):
+    def __init__(self, quiet=False, headless=True, workers=0, browser='chrome'):
         '''
         :param quiet: no output
         :param headless: no UI(no graphical display)
         :param workers: the number of threads when downloading images, `0` means the cpu count
+        :param browser: the web-browser, chrome needs ChromeDriver, firefox needs GeckoDriver
         '''
-        browser = 'chrome'
-        assert browser in ['firefox', 'chrome', 'ie', 'opera', 'safari', 'phantomjs']
+        self.browser = browser.lower()
+        assert self.browser in ['firefox', 'chrome', 'ie', 'opera', 'safari', 'phantomjs']
 
         options._options = {'quiet': quiet}  # set global options
         self.quiet = quiet
         self.workers = int(workers)
         self.headless = headless
+        self.driver = self.decide_driver()
 
-        # To see http://chromedriver.storage.googleapis.com/index.html for chromedriver.
-        # If it cann't run, please check out chromedriver's version and upgrade to the newest.
-        opt = None
-        if self.headless:
+    def decide_driver(self):
+        if self.browser not in ['firefox', 'chrome']:
+            raise AssertionError("only firefox or chrome supported.")
+        if self.browser == 'chrome':
+            # To see http://chromedriver.storage.googleapis.com/index.html for chromedriver.
+            # If it cann't run, please check out chromedriver's version and upgrade to the newest.
             opt = webdriver.chrome.options.Options()
-            opt.set_headless(headless=True)
-        self.driver = webdriver.Chrome(CHROMEDRIVER, options=opt)
+            # bugfix: https://stackoverflow.com/questions/50642308/org-openqa-selenium-webdriverexception-unknown-error-devtoolsactiveport-file-d
+            opt.add_argument("start-maximized")  # open Browser in maximized mode
+            opt.add_argument("disable-infobars")  # disabling infobars
+            opt.add_argument("--disable-extensions")  # disabling extensions
+            opt.add_argument("--disable-gpu")  # applicable to windows os only
+            opt.add_argument("--disable-dev-shm-usage")  # overcome limited resource problems
+            opt.add_argument("--no-sandbox")  # Bypass OS security model
+            if self.headless:
+                opt.set_headless(headless=True)  # no graphical display
+            driver = webdriver.Chrome(CHROMEDRIVER, options=opt)
+            return driver
+        elif self.browser == 'firefox':
+            raise NotImplemented
 
     def close(self):
         if self.driver and hasattr(self.driver, 'quit'):
