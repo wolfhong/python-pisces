@@ -7,14 +7,16 @@ This project origins from the needs of image dataset for algorithm training.
 Image search engines, such as Google, are quite powerful now. They are enough if we could use them.
 However, they didn't provide convenient API for us.
 
-Pisces uses [selenuim](https://www.seleniumhq.org/), which can work with mainstream browsers to download the images we need.
-Pisces supports these search engines: google, yahoo, bing, baidu(china) and more in the future.
+Pisces uses [selenuim](https://www.seleniumhq.org/), which can work with chromedriver to download the images we need.
+Pisces supports these search engines: google, yahoo, bing, baidu(china) and more mainstream engines in the future.
+
+## Why use pisces?(Chinese)
 
 本项目起源于算法训练需要图像数据集的需求.
 
-现有的图片搜索引擎,比如Google,相当强大了,能够利用起来,已经可以满足我们的需求.然而,这些网站并没有提供方便的API让我们得到图片链接.
+现有的图片搜索引擎,比如Google,相当强大了,能够利用起来,已经可以满足我们的需求. 然而,这些网站并没有提供方便的API让我们得到图片链接.
 
-Pisces使用了selenuim,可调用主流的浏览器下载搜索到的图片.Pisces还整合了其他的搜索引擎的搜索结果:google/yahoo/bing/百度.
+Pisces使用了[selenuim](https://www.seleniumhq.org/), 可调用主流的浏览器下载搜索到的图片. Pisces还整合了其他的搜索引擎的搜索结果:google/yahoo/bing/百度.
 
 ## Installation
 
@@ -34,7 +36,7 @@ From source code:
 
 ## Console Command
 
-Once you have installed Pisces, you can easily use it to search for and download images:
+Once you have installed Pisces, you can easily use it to search for and download images by keywords:
 
     $ pisces -e google -w 8 -n 500 fire "kitchen fire" -o ./output
 
@@ -76,7 +78,7 @@ Use `pisces -h` to show the usage:
       -v, --version         print the version and exit
 ```
 
-`pisces` console command can work on any platform: windows, linux, mac, and it had beed fully tested.
+Pisces can work on these platforms: windows, linux, mac, and it had beed tested.
 If not, you're welcome to [file an issue](https://github.com/wolfhong/python-pisces/issues).
 
 More examples:
@@ -113,8 +115,8 @@ Pisces can also be included in your projects:
 
 ## About
 
-Pisces is just a tools to search for and download images, using image search engine such as google, bing, baidu, etc.
-I hope it can help you in somewhere.
+Pisces is just a tools to search for and download images by keywords, using image search engine such as google, bing, baidu, etc.
+I hope it could help you in somewhere.
 
 * [Issue tracker](https://github.com/wolfhong/python-pisces/issues?status=new&status=open)
 * [Source Code](https://github.com/wolfhong/python-pisces)
