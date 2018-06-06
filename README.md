@@ -36,7 +36,7 @@ From source code:
 
 Once you have installed Pisces, you can easily use it to search for and download images:
 
-    $ pisces -e google --display -w 8 -n 500 fire "kitchen fire" -o ./output
+    $ pisces -e google -w 8 -n 500 fire "kitchen fire" -o ./output
 
 The above command will start up chromedriver and then google "fire" and "kitchen fire" with its image search engine,
 download images with 8 threads parallelly and then restore these images in "./output" directory.

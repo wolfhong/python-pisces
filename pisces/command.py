@@ -36,7 +36,7 @@ def create_parser():
                         help="the max number of images you want to download, default to 100")
     parser.add_argument('-o', '--output_dir',
                         action="store",
-                        default='./output',
+                        default='output',
                         help="destination to restore downloaded images, default to ./output"
                         )
     parser.add_argument('keywords',
