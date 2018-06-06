@@ -27,8 +27,9 @@ def create_parser():
     parser.add_argument('-b', '--browser',
                         action="store",
                         default="chrome",
+                        choices=["chrome", ],
                         help="the browser you have installed, default to chrome. "
-                        "select within [chrome, firefox]")
+                        "select within [chrome]")
     parser.add_argument('-w', '--workers',
                         action="store",
                         default=0,

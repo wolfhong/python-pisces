@@ -159,7 +159,7 @@ class Pisces(object):
             driver = webdriver.Chrome(CHROMEDRIVER, options=opt)
             return driver
         elif self.browser == 'firefox':
-            raise NotImplemented
+            raise NotImplementedError
 
     def close(self):
         if self.driver and hasattr(self.driver, 'quit'):

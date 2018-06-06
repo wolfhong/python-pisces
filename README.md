@@ -76,7 +76,7 @@ Use `pisces -h` to show the usage:
                             google. select within [google, bing, yahoo, baidu]
       -b BROWSER, --browser BROWSER
                             the browser you have installed, default to chrome.
-                            select within [chrome, firefox] 
+                            select within [chrome] 
       -w WORKERS, --workers WORKERS
                             the number of threads when downloading images, default
                             to cpu core count
