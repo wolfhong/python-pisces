@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
+import codecs
 from setuptools import setup
 from pisces import __version__
 
@@ -8,7 +9,7 @@ from pisces import __version__
 def read(fname):
     """Loads the contents of a file, returning it as a string"""
     filepath = os.path.join(os.path.dirname(__file__), fname)
-    return open(filepath, 'r').read()
+    return codecs.open(filepath, 'r', 'utf8').read()
 
 
 setup(
@@ -42,7 +43,7 @@ setup(
     data_files=[('tools', ['tools/chromedriver_mac', 'tools/chromedriver_linux', 'tools/chromedriver.exe'])],
     platforms='any',
     install_requires=[
-        'selenium>=2.53.6',
+        'selenium>=3.8.0',
         'requests',
     ],
     python_requires='>=2.7, <4',

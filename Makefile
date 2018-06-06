@@ -4,7 +4,7 @@ PYTEST := pytest
 .PHONY: build test clean package package-test
 
 build:
-	PYTHONPATH=./ $(PYTHON) scripts/update_chromedriver.py
+	PYTHONPATH=./ $(PYTHON) scripts/update_chromedriver.py auto
 
 test:
 	PYTHONPATH=./ $(PYTEST) -v tests/
