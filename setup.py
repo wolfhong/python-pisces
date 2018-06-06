@@ -40,7 +40,7 @@ setup(
     ],
     license="MIT",
     packages=['pisces', ],
-    data_files=[('tools', ['tools/chromedriver_mac', 'tools/chromedriver_linux', 'tools/chromedriver.exe'])],
+    package_data={"pisces": ["tools/chromedriver*"]},
     platforms='any',
     install_requires=[
         'selenium>=3.8.0',

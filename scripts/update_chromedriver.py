@@ -11,7 +11,7 @@ import requests
 latest_url = 'http://chromedriver.storage.googleapis.com/LATEST_RELEASE'
 latest_release = requests.get(latest_url, timeout=5).text.strip()
 
-ROOT_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+ROOT_PATH = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'pisces')
 
 # rewrite CURRENT_RELEASE to newest
 current_file = os.path.join(ROOT_PATH, 'tools', 'CURRENT_RELEASE')
