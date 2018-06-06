@@ -42,6 +42,11 @@ From source code:
     python scripts/update_chromedriver.py  # download newest chromedriver according to platform
     python setup.py install
 
+In addition to chrome, you can also use [firefox](https://www.mozilla.org/). However, you need to do extra settings.
+You have to download [geckodriver](https://github.com/mozilla/geckodriver/releases) and put it into your `$PATH`, which helps selenium interacting with firefox browser.
+
+Pisces uses chrome as the default browser. You don't need to download [chromedriver](http://chromedriver.storage.googleapis.com/index.html) youself because Pisces has built-in ones.
+
 ## Console Command
 
 Once you have installed Pisces, you can easily use it to search for and download images by keywords:
@@ -76,7 +81,7 @@ Use `pisces -h` to show the usage:
                             google. select within [google, bing, yahoo, baidu]
       -b BROWSER, --browser BROWSER
                             the browser you have installed, default to chrome.
-                            select within [chrome] 
+                            select within [chrome, firefox]
       -w WORKERS, --workers WORKERS
                             the number of threads when downloading images, default
                             to cpu core count

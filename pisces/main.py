@@ -27,10 +27,13 @@ else:
 ROOT_PATH = os.path.abspath(os.path.dirname(__file__))
 if sys.platform.startswith('darwin'):
     CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools', 'chromedriver_mac')
+    GECKODRIVER = os.path.join(ROOT_PATH, 'tools', 'geckodriver_mac')
 elif sys.platform.startswith('linux'):
     CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools', 'chromedriver_linux')
+    GECKODRIVER = os.path.join(ROOT_PATH, 'tools', 'geckodriver_linux')
 elif sys.platform in ['win32', 'cygwin']:
     CHROMEDRIVER = os.path.join(ROOT_PATH, 'tools', 'chromedriver.exe')
+    GECKODRIVER = os.path.join(ROOT_PATH, 'tools', 'geckodriver.exe')
 
 
 class GlobalOptions(object):
@@ -45,6 +48,7 @@ class GlobalOptions(object):
         else:
             raise AttributeError("'%s' has no attribute '%s'" % (
                 self.__class__.__name__, name))
+
 
 options = GlobalOptions()
 
@@ -134,10 +138,11 @@ class Pisces(object):
         self.browser = browser.lower()
         assert self.browser in ['firefox', 'chrome', 'ie', 'opera', 'safari', 'phantomjs']
 
-        options._options = {'quiet': quiet}  # set global options
         self.quiet = quiet
         self.workers = int(workers)
         self.headless = headless
+
+        options._options = {'quiet': quiet}  # set global options
         self.driver = self.decide_driver()
 
     def decide_driver(self):
@@ -148,18 +153,28 @@ class Pisces(object):
             # If it cann't run, please check out chromedriver's version and upgrade to the newest.
             opt = webdriver.chrome.options.Options()
             # bugfix: https://stackoverflow.com/questions/50642308/org-openqa-selenium-webdriverexception-unknown-error-devtoolsactiveport-file-d
-            opt.add_argument("start-maximized")  # open Browser in maximized mode
-            opt.add_argument("disable-infobars")  # disabling infobars
             opt.add_argument("--disable-extensions")  # disabling extensions
             opt.add_argument("--disable-gpu")  # applicable to windows os only
             opt.add_argument("--disable-dev-shm-usage")  # overcome limited resource problems
             opt.add_argument("--no-sandbox")  # Bypass OS security model
-            if self.headless:
-                opt.set_headless(headless=True)  # no graphical display
-            driver = webdriver.Chrome(CHROMEDRIVER, options=opt)
-            return driver
+            opt.set_headless(headless=self.headless)  # no graphical display
+
+            params = {'options': opt}
+            if os.path.exists(CHROMEDRIVER):  # if not, put it in $PATH
+                params['executable_path'] = CHROMEDRIVER
+            return webdriver.Chrome(**params)
         elif self.browser == 'firefox':
-            raise NotImplementedError
+            opt = webdriver.firefox.options.Options()
+            opt.add_argument("--disable-extensions")  # disabling extensions
+            opt.add_argument("--disable-gpu")  # applicable to windows os only
+            opt.add_argument("--disable-dev-shm-usage")  # overcome limited resource problems
+            opt.add_argument("--no-sandbox")  # Bypass OS security model
+            opt.set_headless(headless=self.headless)
+
+            params = {'options': opt}
+            if os.path.exists(GECKODRIVER):  # if not, put it in $PATH
+                params['executable_path'] = GECKODRIVER
+            return webdriver.Firefox(**params)
 
     def close(self):
         if self.driver and hasattr(self.driver, 'quit'):
