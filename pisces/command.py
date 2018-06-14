@@ -70,8 +70,8 @@ def main():
             keywords[i] = word.decode(sys.stdin.encoding)
     with Pisces(quiet=args.quiet, headless=not args.display, workers=args.workers, browser=args.browser) as client:
         for word in keywords:
-            output_dir = os.path.join(args.output_dir, word)
-            output_dir = '_'.join(output_dir.split())
+            format_word = '_'.join(word.split())
+            output_dir = os.path.join(args.output_dir, format_word)
             client.download_by_word(word, output_dir,
                     engine=args.engine,
                     image_count=args.number)
