@@ -34,6 +34,7 @@ Use pip:
 
 From source code:
 
+``` bash
     git clone https://github.com/wolfhong/python-pisces.git
     cd python-pisces
 
@@ -41,6 +42,7 @@ From source code:
     export PYTHONPATH=./
     python scripts/update_chromedriver.py  # download newest chromedriver according to platform
     python setup.py install
+```
 
 In addition to chrome, you can also use [firefox](https://www.mozilla.org/). However, you need to do extra settings for firefox. You have to download [geckodriver](https://github.com/mozilla/geckodriver/releases) and put it into your `$PATH`, which helps selenium interacting with firefox browser.
 
@@ -63,7 +65,7 @@ If you're in China, you're recommended to use `-e baidu` instand of `-e google`(
 
 Use `pisces -h` to show the usage:
 
-``` console
+``` bash
     usage: command.py [-h] [-q] [--display] [-e ENGINE] [-w WORKERS] [-n NUMBER]
                   [-o OUTPUT_DIR] [-v]
                   [keywords [keywords ...]]
@@ -99,8 +101,8 @@ Pisces can work on these platforms: windows, linux, mac, and it had beed tested.
 If not, you're welcome to [file an issue](https://github.com/wolfhong/python-pisces/issues).
 
 More examples:
-    
-``` console
+
+``` bash
     $ pisces "kitchen fire" "forest fire"
     $ pisces -n500 "厨房火灾" "森林火灾"
     $ pisces -e baidu -n500 -o path-to-output 火灾 水灾
